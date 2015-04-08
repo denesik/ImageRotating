@@ -54,6 +54,7 @@ void Mirror(std::vector<unsigned char> &image, const uvec2 &size, unsigned int b
     for (unsigned int y = 0; y < size.y / 2; ++y)
     {
       // Берем первую строку и меняем с последней.
+      // Строка посередине не должна копировать сама себя.
       for (unsigned int x = 0; x < size.x * bytes; ++x)
       {
         std::swap(image[y * size.x * bytes + x], image[(size.y - 1 - y) * size.x * bytes + x]);
@@ -84,9 +85,10 @@ void Rotate180(std::vector<unsigned char> &image, const uvec2 &size, unsigned in
   assert(bytes > 0 && bytes <= 4);
   assert(image.size() == size.x * size.y * bytes);
 
-  for (unsigned int y = 0; y < size.y / 2; ++y)
+  for (unsigned int y = 0; y <= size.y / 2; ++y)
   {
     // Берем первую строку и меняем с последней.
+    // Строку посередине тоже обработаем.
     for (unsigned int x = 0; x < size.x; ++x)
     {
       for (unsigned int k = 0; k < bytes; ++k)
@@ -112,6 +114,20 @@ int main()
   Rotate180(out, size);
 
   lodepng::encode("outMirror.png", out, size.x, size.y);
+
+//   uvec2 size;
+//   size.x = 9;
+//   size.y = 4;
+// 
+//   for (unsigned int y = 0; y < size.y; ++y)
+//   {
+//     for (unsigned int x = 0; x < size.x; ++x)
+//     {
+//       unsigned int x2 = size.y - 1 - (y * size.x + x) % size.y;
+//       unsigned int y2 = (y * size.x + x) / size.y;
+//       printf("xy1: %i, %i; xy2: %i, %i; xy3: %i, %i\n", x, y, x2, y2, size.y - 1 - y, x);
+//     }
+//   }
 
   return 0;
 }
