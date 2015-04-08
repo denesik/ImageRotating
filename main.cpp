@@ -40,6 +40,40 @@ std::vector<unsigned char> Rotate(const std::vector<unsigned char> &image, const
   return outImage;
 }
 
+/// Зеркалирование.
+/// image Изображение.
+/// size Размер изображения.
+/// bytes Сколько байт занимает один пиксель.
+/// direction Направление. true - по оси X. false - по оси Y.
+void Mirror(std::vector<unsigned char> &image, const uvec2 &size, unsigned int bytes = 4, bool direction = true)
+{
+  assert(bytes > 0 && bytes <= 4);
+  assert(image.size() == size.x * size.y * bytes);
+  if(direction)
+  {
+    for (unsigned int y = 0; y < size.y / 2; ++y)
+    {
+      // Берем первую строку и меняем с последней.
+      for (unsigned int x = 0; x < size.x * bytes; ++x)
+      {
+        std::swap(image[y * size.x * bytes + x], image[(size.y - 1 - y) * size.x * bytes + x]);
+      }
+    }
+  }
+  else
+  {
+    for (unsigned int x = 0; x < size.x / 2; ++x)
+    {
+      for (unsigned int y = 0; y < size.y; ++y)
+      {
+        for (unsigned int k = 0; k < bytes; ++k)
+        {
+          std::swap(image[y * size.x * bytes + x * bytes + k], image[y * size.x * bytes + (size.x - 1 - x) * bytes + k]);
+        }
+      }
+    }
+  }
+}
 
 int main()
 {
@@ -50,8 +84,12 @@ int main()
   lodepng::decode(in, size.x, size.y, "in.png");
 
   out = Rotate(in, size);
+  std::swap(size.x, size.y); // После поворота размеры изменились.
 
-  lodepng::encode("out.png", out, size.y, size.x);
+  lodepng::encode("out.png", out, size.x, size.y);
+  Mirror(out, size);
+
+  lodepng::encode("outMirror.png", out, size.x, size.y);
 
   return 0;
 }
