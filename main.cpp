@@ -75,6 +75,28 @@ void Mirror(std::vector<unsigned char> &image, const uvec2 &size, unsigned int b
   }
 }
 
+/// Поворот на 180 градусов.
+/// image Изображение.
+/// size Размер изображения.
+/// bytes Сколько байт занимает один пиксель.
+void Rotate180(std::vector<unsigned char> &image, const uvec2 &size, unsigned int bytes = 4)
+{
+  assert(bytes > 0 && bytes <= 4);
+  assert(image.size() == size.x * size.y * bytes);
+
+  for (unsigned int y = 0; y < size.y / 2; ++y)
+  {
+    // Берем первую строку и меняем с последней.
+    for (unsigned int x = 0; x < size.x; ++x)
+    {
+      for (unsigned int k = 0; k < bytes; ++k)
+      {
+        std::swap(image[y * size.x * bytes + x * bytes + k], image[(size.y - 1 - y) * size.x * bytes + (size.x - 1 - x) * bytes + k]);
+      }
+    }
+  }
+}
+
 int main()
 {
   std::vector<unsigned char> in;
@@ -87,7 +109,7 @@ int main()
   std::swap(size.x, size.y); // После поворота размеры изменились.
 
   lodepng::encode("out.png", out, size.x, size.y);
-  Mirror(out, size);
+  Rotate180(out, size);
 
   lodepng::encode("outMirror.png", out, size.x, size.y);
 
